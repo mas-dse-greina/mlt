@@ -5,6 +5,7 @@ Usage:
   mlt --version
   mlt init [--template=<template> --template-repo=<repo>]
       [--registry=<registry> --namespace=<namespace] <name>
+  mlt update [--template-repo=<repo>] [--template=<template>]
   mlt build [--watch]
   mlt deploy [--no-push]
   mlt undeploy
@@ -24,7 +25,7 @@ Options:
 from docopt import docopt
 
 from mlt.commands import (BuildCommand, DeployCommand, InitCommand,
-                          TemplatesCommand, UndeployCommand)
+                          TemplatesCommand, UndeployCommand, UpdateCommand)
 
 # every available command and its corresponding action will go here
 COMMAND_MAP = (
@@ -34,6 +35,7 @@ COMMAND_MAP = (
     ('template', TemplatesCommand),
     ('templates', TemplatesCommand),
     ('undeploy', UndeployCommand),
+    ('update', UpdateCommand),
 )
 
 
