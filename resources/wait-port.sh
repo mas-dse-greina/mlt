@@ -1,5 +1,4 @@
-#
-# -*- coding: utf-8 -*-
+#!/bin/bash
 #
 # Copyright (c) 2018 Intel Corporation
 #
@@ -18,19 +17,17 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-from contextlib import contextmanager
-from mlt.utils import process_helpers
-import shutil
-import tempfile
+if [ $# -ne 2 ]
+then
+	echo "usage: wait-port <ip> <port>" 1>&2
+	exit 1
+fi
 
+ip=$1
+port=$2
 
-@contextmanager
-def clone_repo(repo):
-    destination = tempfile.mkdtemp()
-    process_helpers.run_popen(
-        "git clone {} {}".format(repo, destination),
-        shell=True, stdout=None, stderr=None).wait()
-    try:
-        yield destination
-    finally:
-        shutil.rmtree(destination)
+until nc -z $ip $port
+do
+	# One second delay between retries.
+	sleep 1
+done

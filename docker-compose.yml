@@ -25,7 +25,7 @@ services:
       - "kubernetes"
       - "registry"
     environment:
-      - KUBECONFIG=/usr/share/mlt/resources/config
+      - KUBECONFIG=/usr/share/mlt/resources/config.yaml
     command: "sleep inf"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

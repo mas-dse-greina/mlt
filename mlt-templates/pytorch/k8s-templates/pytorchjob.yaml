@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: $app-$run
+  labels:
+    mlt-app-name: $app
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - image: $image
+          name: pytorch
+          resources:
+            limits:
+              memory: "200Mi"
+              cpu: ".1"

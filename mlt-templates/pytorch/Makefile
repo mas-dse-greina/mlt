@@ -1,6 +1,3 @@
-#
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2018 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,19 +15,13 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-from contextlib import contextmanager
-from mlt.utils import process_helpers
-import shutil
-import tempfile
+.PHONY: dependencies
 
+all: main
 
-@contextmanager
-def clone_repo(repo):
-    destination = tempfile.mkdtemp()
-    process_helpers.run_popen(
-        "git clone {} {}".format(repo, destination),
-        shell=True, stdout=None, stderr=None).wait()
-    try:
-        yield destination
-    finally:
-        shutil.rmtree(destination)
+main: main.py
+	@echo "Should run linting and tests before submitting application"
+
+build:
+	docker pull pytorch/pytorch:v0.2
+	docker tag pytorch/pytorch:v0.2 ${CONTAINER_NAME}

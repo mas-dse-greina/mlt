@@ -1,9 +1,29 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 from mock import patch
 import pytest
 import uuid
 from subprocess import CalledProcessError
 
-from mlt.utils.process_helpers import run, run_popen, run_popen_unsecure
+from mlt.utils.process_helpers import run, run_popen
 from test_utils.io import catch_stdout
 
 
@@ -50,8 +70,8 @@ def test_run_popen(popen):
 
 
 @patch('mlt.utils.process_helpers.Popen')
-def test_run_popen_unsecure(popen):
+def test_run_popen_shell(popen):
     """Popen call should succeed"""
     popen.return_value = 0
-    result = run_popen_unsecure('ls /tmp')
+    result = run_popen('ls /tmp', shell=True)
     assert result == 0
