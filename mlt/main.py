@@ -24,7 +24,7 @@ Usage:
   mlt --version
   mlt init [--template=<template> --template-repo=<repo>]
       [--registry=<registry> --namespace=<namespace] <name>
-  mlt update [--template-repo=<repo>] [--template=<template>]
+  mlt update
   mlt build [--watch]
   mlt deploy [--no-push]
   mlt undeploy

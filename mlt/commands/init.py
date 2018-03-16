@@ -40,12 +40,12 @@ class InitCommand(Command):
         """Creates a new git repository based on an mlt template in the
            current working directory.
         """
-        template_name = self.args["--template"]
-        template_repo = self.args["--template-repo"]
+        self.template_name = self.args["--template"]
+        self.template_repo = self.args["--template-repo"]
 
-        with git_helpers.clone_repo(template_repo) as temp_clone:
+        with git_helpers.clone_repo(self.template_repo) as temp_clone:
             templates_directory = os.path.join(
-                temp_clone, TEMPLATES_DIR, template_name)
+                temp_clone, TEMPLATES_DIR, self.template_name)
 
             try:
                 shutil.copytree(templates_directory, self.app_name)
@@ -79,6 +79,9 @@ class InitCommand(Command):
             data['namespace'] = getpass.getuser()
         else:
             data['namespace'] = self.args["--namespace"]
+        
+        data['template_name'] = self.template_name
+        data['template_repo'] = self.template_repo
 
         return data
 

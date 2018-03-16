@@ -8,4 +8,4 @@ class UpdateCommand(Command):
     def action(self):
         """TBD
         """
-        pass
+        print(self.args)
