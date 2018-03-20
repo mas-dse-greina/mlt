@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: $app-$run
+spec:
+  template:
+    spec:
+      containers:
+      - name: $app
+        image: $image
+      restartPolicy: Never

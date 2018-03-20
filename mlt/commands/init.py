@@ -23,12 +23,16 @@ import json
 import os
 import sys
 import shutil
+import
 from subprocess import check_output
 import traceback
 
 from mlt import TEMPLATES_DIR
 from mlt.commands import Command
 from mlt.utils import process_helpers, git_helpers
+
+from kubernetes import client
+import kubernetes
 
 
 class InitCommand(Command):
@@ -49,6 +53,24 @@ class InitCommand(Command):
 
             try:
                 shutil.copytree(templates_directory, self.app_name)
+
+                # If crd-requirements.txt file exists in template
+                # then check whether crd installed or not.
+                crd_file = os.path.join(self.app_name, 'crd-requirements.txt')
+                crd_list = []
+                if os.path.exists(crd_file):
+                    with open(crd_file) as f:
+                        crd_list = f.read().splitlines()
+
+                if not self._check_crds_exists(crd_list):
+                    print("Do you want us to install operators? Please say yes or no")
+                    flag = raw_input()
+                    if flag is 'yes':
+                        for crd in crd_list:
+                            print("Installing {} operator on your k8 cluster".format(crd))
+                            process_helpers.run(["make", "-f", "Makefile.{}".format(crd)], cwd=self.app_name)
+                    else:
+                        sys.exit(1)
 
                 data = self._build_mlt_json()
                 with open(os.path.join(self.app_name, 'mlt.json'), 'w') as f:
@@ -90,3 +112,26 @@ class InitCommand(Command):
         process_helpers.run(["git", "add", "."], cwd=self.app_name)
         print(process_helpers.run(
             ["git", "commit", "-m", "Initial commit."], cwd=self.app_name))
+
+    def _load_kube_conf(self):
+        kubernetes.config.load_kube_config(
+            config_file=os.path.expanduser('~/.kube/config')
+        )
+        return client.ApiextensionsV1beta1Api()
+
+    def _check_crds_exists(self, crd_list):
+        """
+        Check if given crd list installed on K8 or not.
+        """
+        crd_client = self._load_kube_conf()
+        current_crds = [x['spec']['names']['kind'].lower()
+                        for x in crd_client.list_custom_resource_definition().to_dict()['items']]
+        flag = True
+        for crd in crd_list:
+            if crd not in current_crds:
+                flag = False
+                print("Required \"{}\" operator not installed".format(crd))
+
+        return flag
+
+

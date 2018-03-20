@@ -1,3 +1,4 @@
-tensorflow
+docopt
 pycodestyle
+tensorflow
 kubernetes
