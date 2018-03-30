@@ -33,6 +33,8 @@ Installation:
 
 ```bash
 $ make
+
+example
 # Two different options to running `mlt`:
 $ source ./.venv/bin/activate
 # add this to ~/.bash_profile, ~/.bashrc, etc and then source it
