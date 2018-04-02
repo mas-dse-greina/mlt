@@ -69,10 +69,11 @@ class CommandTester(object):
                 self.namespace) +
             "--sort-by=.status.startTime -o json", shell=True
         ).stdout.read().decode('utf-8')
+        pods = json.loads(pods).get('items')
         if pods:
-            return json.loads(pods)['items'][-1]
+            return pods[-1]
         else:
-            raise ValueError("No pod deployed to namespace {}".format(
+            raise ValueError("No pod(s) deployed to namespace {}".format(
                 self.namespace))
 
     def init(self):
