@@ -29,6 +29,7 @@ Prerequisites:
 - python
 - tox
 - virtualenv
+- TFJob operator (for the distributed tensorflow templates)
 
 Installation:
 
