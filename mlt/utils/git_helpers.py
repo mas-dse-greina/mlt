@@ -35,5 +35,7 @@ def clone_repo(repo):
     try:
         yield destination
     finally:
+        # This is really a bug in 'shutil' as described here:
+        # https://bugs.python.org/issue29699
         if os.path.exists(destination):
             shutil.rmtree(destination)
