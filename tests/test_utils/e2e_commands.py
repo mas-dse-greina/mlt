@@ -62,6 +62,19 @@ class CommandTester(object):
             catalog_call = 'curl --noproxy \"*\"  registry:5000/v2/_catalog'
         return catalog_call
 
+    def _grab_latest_pod(self):
+        """grabs latest pod by startTime"""
+        pods = run_popen(
+            "kubectl get pods -a --namespace {} ".format(
+                self.namespace) +
+            "--sort-by=.status.startTime -o json", shell=True
+        ).stdout.read().decode('utf-8')
+        if pods:
+            return json.loads(pods)['items'][-1]
+        else:
+            raise ValueError("No pod deployed to namespace {}".format(
+                self.namespace))
+
     def init(self):
         p = Popen(
             ['mlt', 'init', '--registry={}'.format(self.registry),
@@ -138,11 +151,28 @@ class CommandTester(object):
                 "{} | jq .repositories | jq 'contains([\"{}\"])'".format(
                     self.registry_catalog_call, self.app_name),
                 shell=True).stdout.read().decode("utf-8")
-        # verify that our job did indeed get deployed to k8s
-        # TODO: fix this check: https://github.com/IntelAI/mlt/issues/105
-        assert run_popen(
-            "kubectl get jobs --namespace={}".format(self.namespace),
-            shell=True).wait() == 0
+
+        # verify that our latest job did indeed get deployed to k8s
+        pod_status = self._grab_latest_pod()['status']['phase']
+        # wait for pod to finish, up to 10 sec for pending and 30 for running
+        # not counting interactive that will always be running
+        start = time.time()
+        while pod_status == 'Pending':
+            time.sleep(1)
+            pod_status = self._grab_latest_pod()['status']['phase']
+            if time.time() - start >= 10:
+                break
+
+        # interactive pods are `sleep; infinity` so will still be running
+        if not interactive:
+            while pod_status == 'Running':
+                time.sleep(1)
+                pod_status = self._grab_latest_pod()['status']['phase']
+                if time.time() - start >= 40:
+                    break
+            assert pod_status == 'Succeeded'
+        else:
+            assert pod_status == 'Running'
 
     def undeploy(self):
         p = Popen(['mlt', 'undeploy'], cwd=self.project_dir)
