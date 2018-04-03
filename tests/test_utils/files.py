@@ -30,4 +30,7 @@ def create_work_dir():
     finally:
         # even on error we still need to remove dir when done
         # https://docs.python.org/2/library/tempfile.html#tempfile.mkdtemp
-        shutil.rmtree(workdir)
+        # This is really a bug in 'shutil' as described here:
+        # https://bugs.python.org/issue29699
+        if os.path.exists(destination):
+            shutil.rmtree(destination)
