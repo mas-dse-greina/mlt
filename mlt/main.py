@@ -54,8 +54,9 @@ Options:
   --no-push                 Deploy your project to kubernetes using the same
                             image from your last run.
 """
-from docopt import docopt
 import re
+from docopt import docopt
+
 from mlt.commands import (BuildCommand, DeployCommand, InitCommand,
                           TemplatesCommand, UndeployCommand)
 
