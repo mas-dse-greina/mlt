@@ -1,43 +1,30 @@
-version: '2'
+version: "3"
+
+networks:
+  hyperkube: {}
+
 services:
   etcd:
-    image: "quay.io/coreos/etcd:v3.2"
-    command: "etcd --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379"
+    image: gcr.io/google_containers/etcd:2.3.7
+    networks:
+      - hyperkube
+    command: ['/usr/local/bin/etcd', '--addr=127.0.0.1:4001', '--bind-addr=0.0.0.0:4001', '--data-dir=/var/etcd/data']
+
+  master:
+    image: gcr.io/google_containers/hyperkube-amd64:v1.8.5
+    networks:
+      - hyperkube
+    privileged: true
     ports:
-      - 2379:2379
-
-  kubernetes:
-    image: "gcr.io/google-containers/hyperkube-amd64:v1.8.5"
-    depends_on:
-      - "etcd"
-    command: "/hyperkube apiserver --insecure-bind-address=0.0.0.0 --etcd-servers=http://etcd:2379 --service-cluster-ip-range=10.0.0.0/16"
-    ports:
-    - 8080:8080
-
-  kubelet:
-    image: "gcr.io/google-containers/hyperkube-amd64:v1.8.5"
-    depends_on:
-      - "etcd"
-    command: "/hyperkube kubelet --api_servers=http://kubernetes:8080 --enable_server --hostname_override=127.0.0.1 --v=2 --address=0.0.0.0"
-
-  kube-proxy:
-    image: "gcr.io/google-containers/hyperkube-amd64:v1.8.5"
-    depends_on:
-      - "etcd"
-    command: "/hyperkube proxy --master=http://kubernetes:8080 --v=2"
-  
-  registry:
-    image: "registry:2"
-    ports:
-    - 5000:5000
-
-  test:
-    image: "mlt"
-    depends_on:
-      - "kubernetes"
-      - "registry"
-    environment:
-      - KUBECONFIG=/usr/share/mlt/resources/config.yaml
-    command: "sleep inf"
+      - 8080
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    command: ['/hyperkube', 'kubelet', '--hostname-override=127.0.0.1', '--address=0.0.0.0', '--api-servers=http://localhost:8080', '--enable-server', '--config=/etc/kubernetes/manifests', '--containerized', '--v=2']
+
+  proxy:
+    image: gcr.io/google_containers/hyperkube-amd64:v1.8.5
+    networks:
+      - hyperkube
+    pid: host
+    privileged: true
+    command: ['/hyperkube', 'proxy', '--master=http://127.0.0.1:8080', '--v=2']
