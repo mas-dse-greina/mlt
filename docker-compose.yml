@@ -13,6 +13,18 @@ services:
     command: "/hyperkube apiserver --insecure-bind-address=0.0.0.0 --etcd-servers=http://etcd:2379 --service-cluster-ip-range=10.0.0.0/16"
     ports:
     - 8080:8080
+
+  kubelet:
+    image: "gcr.io/google-containers/hyperkube-amd64:v1.8.5"
+    depends_on:
+      - "etcd"
+    command: "/hyperkube kubelet --api_servers=http://kubernetes:8080 --enable_server --hostname_override=127.0.0.1 --v=2 --address=0.0.0.0"
+
+  kube-proxy:
+    image: "gcr.io/google-containers/hyperkube-amd64:v1.8.5"
+    depends_on:
+      - "etcd"
+    command: "/hyperkube proxy --master=http://kubernetes:8080 --v=2"
   
   registry:
     image: "registry:2"
