@@ -151,7 +151,18 @@ class CommandTester(object):
                     self.registry_catalog_call, self.app_name),
                 shell=True).stdout.read().decode("utf-8")
 
-        # verify that our latest job did indeed get deployed to k8s
+        self._verify_pod_success(interactive)
+
+    def undeploy(self):
+        p = Popen(['mlt', 'undeploy'], cwd=self.project_dir)
+        assert p.wait() == 0
+        # verify no more deployment job
+        assert run_popen(
+            "kubectl get jobs --namespace={}".format(
+                self.namespace), shell=True).wait() == 0
+
+    def _verify_pod_success(self, interactive_deploy):
+        """verify that our latest job did indeed get deployed to k8s"""
         pod_status = self._grab_latest_pod()['status']['phase']
         # wait for pod to finish, up to 10 sec for pending and 30 for running
         # not counting interactive that will always be running
@@ -163,7 +174,7 @@ class CommandTester(object):
                 break
 
         # interactive pods are `sleep; infinity` so will still be running
-        if not interactive:
+        if not interactive_deploy:
             while pod_status == 'Running':
                 time.sleep(1)
                 pod_status = self._grab_latest_pod()['status']['phase']
@@ -172,11 +183,3 @@ class CommandTester(object):
             assert pod_status == 'Succeeded'
         else:
             assert pod_status == 'Running'
-
-    def undeploy(self):
-        p = Popen(['mlt', 'undeploy'], cwd=self.project_dir)
-        assert p.wait() == 0
-        # verify no more deployment job
-        assert run_popen(
-            "kubectl get jobs --namespace={}".format(
-                self.namespace), shell=True).wait() == 0
