@@ -22,7 +22,8 @@ services:
     privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
-    command: "/hyperkube kubelet --hostname-override=127.0.0.1 --address=0.0.0.0 --enable-server --v=2"
+      - ./resources:/resources:rw
+    command: "/hyperkube kubelet --hostname-override=127.0.0.1 --address=0.0.0.0 --enable-server --kubeconfig=/resources/config.yaml --containerized --v=2 --fail-swap-on=false"
 
   proxy:
     image: gcr.io/google_containers/hyperkube-amd64:v1.8.5
