@@ -8,6 +8,12 @@ spec:
   replicaSpecs:
     - replicas: 1
       tfReplicaType: PS
+      template:
+        spec:
+          containers:
+            - image: $image
+              name: tensorflow
+          restartPolicy: OnFailure
     - replicas: 1
       tfReplicaType: MASTER
       template:

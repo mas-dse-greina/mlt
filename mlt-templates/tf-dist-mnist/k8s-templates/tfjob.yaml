@@ -6,7 +6,7 @@ metadata:
     mlt-app-name: $app
 spec:
   replicaSpecs:
-    - replicas: 1
+    - replicas: $num_ps
       tfReplicaType: PS
       template:
         spec:
@@ -14,7 +14,7 @@ spec:
             - image: $image
               name: tensorflow
           restartPolicy: OnFailure
-    - replicas: 2
+    - replicas: $num_workers
       tfReplicaType: WORKER
       template:
         spec:

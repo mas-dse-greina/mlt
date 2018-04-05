@@ -1,0 +1,6 @@
+{
+  "template_parameters" : [
+    { "name": "num_ps", "value": "1" },
+    { "name": "num_workers", "value": "2" }
+  ]
+}

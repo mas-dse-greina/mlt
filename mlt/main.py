@@ -23,10 +23,11 @@ Usage:
   mlt (-h | --help)
   mlt --version
   mlt init [--template=<template> --template-repo=<repo>]
-      [--registry=<registry> --namespace=<namespace>] <name>
+      [--registry=<registry> --namespace=<namespace]
+      [--skip-crd-check] <name>
   mlt build [--watch]
   mlt deploy [--no-push] [-i | --interactive]
-      [--retries=<retries>] [<kube_spec>]
+      [--retries=<retries>] [--skip-crd-check] [<kube_spec>]
   mlt undeploy
   mlt (template | templates) list [--template-repo=<repo>]
 
@@ -40,6 +41,8 @@ Options:
   --namespace=<namespace>   Kubernetes Namespace to use.
                             If none is set, will attempt to create or
                             use a namespace identical to username.
+  --skip-crd-check          To avoid crd check during mlt init
+                            [default: False].
   --retries=<retries>       Number of times to connect to a pod interactively.
                             Waits 1 second between retrying.
                             [default: 10]
@@ -53,6 +56,7 @@ Options:
   --watch                   Watch project directory and build on file changes
   --no-push                 Deploy your project to kubernetes using the same
                             image from your last run.
+
 """
 import re
 from docopt import docopt

@@ -8,4 +8,7 @@ spec:
       containers:
       - name: $app
         image: $image
+        env:
+        - name: GREETING
+          value: $greeting
       restartPolicy: Never

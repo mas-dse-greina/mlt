@@ -19,6 +19,9 @@
 #
 
 import os
+import sys
+import json
+
 from subprocess import call
 
 from mlt.utils import process_helpers
@@ -29,3 +32,50 @@ def ensure_namespace_exists(ns):
         os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
     if exit_code is not 0:
         process_helpers.run(["kubectl", "create", "namespace", ns])
+
+
+def check_crds(exit_on_failure=False, app_name=None):
+    if app_name is None:
+        crd_file = 'crd-requirements.txt'
+    else:
+        crd_file = os.path.join(app_name, 'crd-requirements.txt')
+    if os.path.exists(crd_file):
+        with open(crd_file) as f:
+            # using f.read().splitlines() instead of f.readlines()
+            # as it does not include new line(\n)
+            crd_set = set(f.read().splitlines())
+
+        missing_crds = checking_crds_on_k8(crd_set)
+        if missing_crds:
+            message_type = "Error" if exit_on_failure else "Warning"
+            print(
+                "{}: Template will "
+                "not work on your current cluster \n"
+                "Please contact your administrator "
+                "to install the "
+                "following operator(s): \n".format(message_type))
+            for crd in missing_crds:
+                print(crd)
+
+            if exit_on_failure:
+                sys.exit(1)
+    else:
+        print('file does not exits: {}'.format(crd_file))
+
+
+def checking_crds_on_k8(crd_set):
+    """
+    Check if given crd list installed on K8 or not.
+    """
+
+    try:
+        current_crds_json = process_helpers.run_popen(
+            "kubectl get crd -o json", shell=True
+        ).stdout.read().decode('utf-8')
+        current_crds = set([str(x['metadata']['name'])
+                            for x in
+                            json.loads(current_crds_json)['items']])
+        return crd_set - current_crds
+    except Exception as ex:
+        print("Crd_Checking - Exception: {}".format(ex))
+        return set()

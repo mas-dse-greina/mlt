@@ -69,11 +69,13 @@ class CommandTester(object):
         assert p.wait() == 0
         assert os.path.isfile(self.mlt_json)
         with open(self.mlt_json) as f:
-            assert json.loads(f.read()) == {
+            standard_configs = {
                 'namespace': self.namespace,
                 'name': self.app_name,
                 'registry': self.registry
             }
+            actual_configs = json.loads((f.read()))
+            assert dict(actual_configs, **standard_configs) == actual_configs
         # verify we created a git repo with our project init
         assert "On branch master" in run(
             "git --git-dir={}/.git --work-tree={} status".format(
