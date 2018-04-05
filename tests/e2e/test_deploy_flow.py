@@ -17,6 +17,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
+import os
 import pytest
 
 from test_utils.e2e_commands import CommandTester
@@ -28,8 +29,9 @@ from test_utils.files import create_work_dir
 
 
 @pytest.mark.parametrize('template',
-                         ['hello-world', 'pytorch', 'tf-dist-mnist',
-                          'tf-distributed'])
+                         filter(lambda x: os.path.isdir(
+                             os.path.join('mlt-templates', x)),
+                             os.listdir('mlt-templates')))
 def test_deploying_templates(template):
     with create_work_dir() as workdir:
         commands = CommandTester(workdir)
