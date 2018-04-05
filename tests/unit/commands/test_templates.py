@@ -18,6 +18,9 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+import os
+import shutil
+
 from mlt.commands.templates import TemplatesCommand
 from test_utils import project
 from test_utils.io import catch_stdout
@@ -40,6 +43,22 @@ def test_template_list_invalid_repo():
         'list': True,
         '--template-repo': "git@github.com:1ntelA1/mlt.git"
     }
+    templates = TemplatesCommand(args)
+    with catch_stdout() as caught_output:
+        templates.action()
+        assert caught_output.getvalue() is not None
+
+def test_template_list_invalid_repo_dir():
+    invalid_repo_dir = "/tmp/invalid-mlt-dir"
+    args = {
+        'template': 'test',
+        'list': True,
+        '--template-repo': invalid_repo_dir
+    }
+
+    if os.path.exists(invalid_repo_dir):
+        shutil.rmtree(invalid_repo_dir)
+
     templates = TemplatesCommand(args)
     with catch_stdout() as caught_output:
         templates.action()
