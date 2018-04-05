@@ -60,11 +60,12 @@ class CommandTester(object):
             catalog_call = 'curl --noproxy \"*\"  registry:5000/v2/_catalog'
         return catalog_call
 
-    def init(self):
+    def init(self, template='hello-world'):
         p = Popen(
             ['mlt', 'init', '--registry={}'.format(self.registry),
              '--template-repo={}'.format(basedir()),
-             '--namespace={}'.format(self.namespace), self.app_name],
+             '--namespace={}'.format(self.namespace),
+             '--template={}'.format(template), self.app_name],
             cwd=self.workdir)
         assert p.wait() == 0
         assert os.path.isfile(self.mlt_json)

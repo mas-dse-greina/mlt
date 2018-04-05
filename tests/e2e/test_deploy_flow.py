@@ -53,3 +53,12 @@ def test_watch_build_and_deploy_no_push():
         commands.deploy()
         commands.deploy(no_push=True)
         commands.undeploy()
+
+
+def test_deploy_pytorch():
+    with create_work_dir() as workdir:
+        commands = CommandTester(workdir)
+        commands.init('pytorch')
+        commands.build()
+        commands.deploy()
+        commands.undeploy()
