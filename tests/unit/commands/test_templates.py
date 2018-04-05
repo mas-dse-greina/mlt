@@ -33,3 +33,14 @@ def test_template_list():
     with catch_stdout() as caught_output:
         templates.action()
         assert caught_output.getvalue() is not None
+
+def test_template_list_invalid_repo():
+    args = {
+        'template': 'test',
+        'list': True,
+        '--template-repo': "git@github.com:1ntelA1/mlt.git"
+    }
+    templates = TemplatesCommand(args)
+    with catch_stdout() as caught_output:
+        templates.action()
+        assert caught_output.getvalue() is not None

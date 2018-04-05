@@ -40,6 +40,8 @@ class TemplatesCommand(Command):
     def _parse_templates(self, templates_directory):
         """parses template dirs in sorted order, pulling data from READMEs"""
         result = []
+        if not os.path.exists(templates_directory):
+            return result
         for filename in sorted(os.listdir(templates_directory)):
             description = '<none>'
             readme_file = os.path.join(
