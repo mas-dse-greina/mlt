@@ -17,6 +17,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
+import pytest
 
 from test_utils.e2e_commands import CommandTester
 from test_utils.files import create_work_dir
@@ -26,10 +27,13 @@ from test_utils.files import create_work_dir
 # otherwise you have no image to use to make new container from
 
 
-def test_simple_deploy():
+@pytest.mark.parametrize('template',
+                         ['hello-world', 'pytorch', 'tf-dist-mnist',
+                          'tf-distributed'])
+def test_deploying_templates(template):
     with create_work_dir() as workdir:
         commands = CommandTester(workdir)
-        commands.init()
+        commands.init(template)
         commands.build()
         commands.deploy()
         commands.undeploy()
@@ -52,13 +56,4 @@ def test_watch_build_and_deploy_no_push():
         commands.build(watch=True)
         commands.deploy()
         commands.deploy(no_push=True)
-        commands.undeploy()
-
-
-def test_deploy_pytorch():
-    with create_work_dir() as workdir:
-        commands = CommandTester(workdir)
-        commands.init('pytorch')
-        commands.build()
-        commands.deploy()
         commands.undeploy()
