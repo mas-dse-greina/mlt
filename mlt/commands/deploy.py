@@ -47,6 +47,7 @@ class DeployCommand(Command):
             print("Skipping image push")
         else:
             self._push()
+
         self._deploy_new_container()
 
     def _push(self):
@@ -128,7 +129,8 @@ class DeployCommand(Command):
                     template = Template(f.read())
                 out = template.substitute(
                     image=remote_container_name,
-                    app=app_name, run=str(uuid.uuid4()))
+                    app=app_name, run=str(uuid.uuid4()),
+                    **config_helpers.get_template_parameters(self.config))
 
                 interactive, out = self._check_for_interactive_deployment(
                     out, filename)

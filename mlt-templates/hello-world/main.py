@@ -21,11 +21,13 @@
 from __future__ import print_function
 
 import tensorflow as tf
+import os
 
-hello = tf.constant('Hello, TensorFlow!')
+greeting = os.environ.get("GREETING", "Hello")
+message = tf.constant('{}, TensorFlow!'.format(greeting))
 
 # Start tf session
 sess = tf.Session()
 
 # Run the op
-print(sess.run(hello))
+print(sess.run(message))

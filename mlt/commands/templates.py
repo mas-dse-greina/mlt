@@ -21,9 +21,9 @@
 import os
 from tabulate import tabulate
 
-from mlt import TEMPLATES_DIR
 from mlt.commands import Command
 from mlt.utils import git_helpers
+from mlt.utils.constants import TEMPLATES_DIR
 
 
 class TemplatesCommand(Command):

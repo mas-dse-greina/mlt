@@ -20,7 +20,8 @@
 
 import pytest
 
-from mlt.utils.config_helpers import load_config
+from mlt.utils import constants
+from mlt.utils.config_helpers import load_config, get_template_parameters
 from test_utils.io import catch_stdout
 
 
@@ -31,3 +32,17 @@ def test_needs_init_command_bad_init():
             assert caught_output.getvalue() == "This command requires you " + \
                    "to be in an `mlt init` built directory"
             assert bad_init.value.code == 1
+
+
+def test_get_empty_template_params():
+    config = {"namespace": "foo", "registry": "bar",
+              constants.TEMPLATE_PARAMETERS: {}}
+    assert get_template_parameters(config) == {}
+
+
+def test_get_template_params():
+    config = {"namespace": "foo", "registry": "bar",
+              constants.TEMPLATE_PARAMETERS:
+                  {"epochs": "10", "num_workers": "4"}}
+    assert get_template_parameters(config) == \
+        {"epochs": "10", "num_workers": "4"}

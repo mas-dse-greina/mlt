@@ -69,6 +69,10 @@ $ mlt init my-app --template=hello-world
  create mode 100644 requirements.txt
 
 $ cd my-app
+
+# Optional step: Modify parameters in the mlt.json file
+$ vim mlt.json
+
 $ mlt build
 Starting build my-app:71fb176d-28a9-46c2-ab51-fe3d4a88b02c
 Building |######################################################| (ETA:  0:00:00)
@@ -96,3 +100,7 @@ Connecting to pod...
 root@test-9e035719-1d8b-4e0c-adcb-f706429ffeac-wl42v:/src/app# ls
 Dockerfile  Makefile  README.md  k8s  k8s-templates  main.py  mlt.json	requirements.txt
 ```
+
+### Template Development
+
+To add new templates, see the [Template Developers Manual](docs/template_developers.md).

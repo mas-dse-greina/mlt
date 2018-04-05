@@ -26,6 +26,7 @@ import shutil
 import pytest
 
 from mlt.commands.init import InitCommand
+from mlt.utils import constants
 from test_utils import project
 from test_utils.io import catch_stdout
 
@@ -41,8 +42,8 @@ def open_mock(patch):
 
 
 @pytest.fixture
-def shutil_mock(patch):
-    return patch('shutil')
+def copytree_mock(patch):
+    return patch('copytree')
 
 
 @pytest.fixture
@@ -53,6 +54,11 @@ def process_helpers(patch):
 @pytest.fixture
 def check_output_mock(patch):
     return patch('check_output')
+
+
+@pytest.fixture
+def config_helpers_mock(patch):
+    return patch('config_helpers')
 
 
 def test_init_dir_exists():
@@ -78,7 +84,8 @@ def test_init_dir_exists():
         os.rmdir(new_dir)
 
 
-def test_init(open_mock, process_helpers, shutil_mock, check_output_mock):
+def test_init(open_mock, process_helpers, copytree_mock, check_output_mock,
+              config_helpers_mock):
     check_output_mock.return_value.decode.return_value = 'bar'
     new_dir = str(uuid.uuid4())
 
@@ -91,6 +98,7 @@ def test_init(open_mock, process_helpers, shutil_mock, check_output_mock):
         '--skip-crd-check': True,
         '<name>': new_dir
     }
+    config_helpers_mock.get_template_parameters_from_file.return_value = [{"name": "greeting", "value": "hello"}]
     init = InitCommand(init_dict)
     init.action()
     assert init.app_name == new_dir
@@ -118,3 +126,40 @@ def test_init_crd_check(checking_crds_mock, process_helpers, check_output_mock):
         assert message_code >= 0
     finally:
         shutil.rmtree(new_dir)
+
+
+def test_template_params():
+    new_dir = str(uuid.uuid4())
+    init_dict = {
+        'init': True,
+        '--template': 'tf-dist-mnist',
+        '--template-repo': project.basedir(),
+        '--registry': True,
+        '--namespace': None,
+        '<name>': new_dir
+    }
+    init = InitCommand(init_dict)
+    template_params = [{'name': 'num_ps', 'value': '1'},
+                       {'name': 'num_workers', 'value': '2'}]
+    result = init._build_mlt_json(template_params)
+    assert constants.TEMPLATE_PARAMETERS in result
+    result_params = result[constants.TEMPLATE_PARAMETERS]
+    for param in template_params:
+        assert param["name"] in result_params
+        assert param["value"] == result_params[param["name"]]
+
+
+def test_no_template_params():
+    new_dir = str(uuid.uuid4())
+    init_dict = {
+        'init': True,
+        '--template': 'tf-dist-mnist',
+        '--template-repo': project.basedir(),
+        '--registry': True,
+        '--namespace': None,
+        '<name>': new_dir
+    }
+    init = InitCommand(init_dict)
+    template_params = None
+    result = init._build_mlt_json(template_params)
+    assert constants.TEMPLATE_PARAMETERS not in result

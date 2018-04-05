@@ -18,6 +18,15 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+# Relative path to templates within a template repository.
+TEMPLATES_DIR = 'mlt-templates'
+
+# Config file name
+MLT_CONFIG = "mlt.json"
+
+# Template parameters file name
+TEMPLATE_CONFIG = "parameters.json"
+
+# Name of config file section that has template parameters
+TEMPLATE_PARAMETERS = "template_parameters"

@@ -21,14 +21,14 @@
 import getpass
 import json
 import os
-import shutil
 import sys
 import traceback
+from shutil import copytree, ignore_patterns
 from subprocess import check_output
 
-from mlt import TEMPLATES_DIR
 from mlt.commands import Command
-from mlt.utils import process_helpers, git_helpers, kubernetes_helpers
+from mlt.utils import (config_helpers, constants, git_helpers,
+                       kubernetes_helpers, process_helpers)
 
 
 class InitCommand(Command):
@@ -45,16 +45,27 @@ class InitCommand(Command):
         skip_crd_check = self.args["--skip-crd-check"]
         with git_helpers.clone_repo(template_repo) as temp_clone:
             templates_directory = os.path.join(
-                temp_clone, TEMPLATES_DIR, template_name)
+                temp_clone, constants.TEMPLATES_DIR, template_name)
 
             try:
-                shutil.copytree(templates_directory, self.app_name)
+                # The template configs get pulled into the mlt.json file, so
+                # don't grab a copy of that in the app directory
+                copytree(templates_directory, self.app_name,
+                         ignore=ignore_patterns(constants.TEMPLATE_CONFIG))
+
+                # Get the template configs from the template and include them
+                # when building the mlt json file
+                param_file = os.path.join(templates_directory,
+                                          constants.TEMPLATE_CONFIG)
+                template_params = config_helpers.\
+                    get_template_parameters_from_file(param_file)
 
                 if not skip_crd_check:
                     kubernetes_helpers.check_crds(app_name=self.app_name)
 
-                data = self._build_mlt_json()
-                with open(os.path.join(self.app_name, 'mlt.json'), 'w') as f:
+                data = self._build_mlt_json(template_params)
+                with open(os.path.join(self.app_name,
+                                       constants.MLT_CONFIG), 'w') as f:
                     json.dump(data, f, indent=2)
                 self._init_git_repo()
             except OSError as exc:
@@ -67,7 +78,7 @@ class InitCommand(Command):
 
                 sys.exit(1)
 
-    def _build_mlt_json(self):
+    def _build_mlt_json(self, template_parameters):
         """generates the data to write to mlt.json"""
         data = {'name': self.app_name, 'namespace': self.app_name}
         if not self.args["--registry"]:
@@ -82,6 +93,12 @@ class InitCommand(Command):
             data['namespace'] = getpass.getuser()
         else:
             data['namespace'] = self.args["--namespace"]
+
+        # Add template specific parameters to the data dictionary
+        if template_parameters:
+            template_data = data[constants.TEMPLATE_PARAMETERS] = {}
+            for param in template_parameters:
+                template_data[param["name"]] = param["value"]
 
         return data
 
